@@ -22,7 +22,7 @@ This project is a simple PHP application to manage domain registrations. It fetc
 
     ```bash
     git clone https://github.com/uydevops/domain-registration-system.git](https://github.com/uydevops/DomainSorgulama)
-    cd domain-registration-system
+    cd domain-DomainSorgulama
     ```
 
 2. **Configure the database:**
