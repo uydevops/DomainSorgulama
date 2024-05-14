@@ -1,82 +1,113 @@
-# Domain Registration and Management System
+# Domain Sorgulama ve Yönetim Sistemi
 
-This project is a simple PHP application to manage domain registrations. It fetches WHOIS data for a given domain and stores relevant information in a database.
+Bu proje, belirli bir alan adı için WHOIS verilerini çekmek ve bu verileri bir veritabanına kaydetmek için basit bir PHP uygulamasıdır. Alan adının kayıt, güncelleme ve bitiş tarihlerini ve kalan gün sayısını hesaplar ve gösterir.
 
-## Features
+## Özellikler
 
-- Fetches domain information using the WHOIS API
-- Stores domain registration, update, and expiry dates in a database
-- Calculates and displays the number of days remaining until the domain expires
-- User-friendly interface for viewing and managing domain records
+- WHOIS API kullanarak alan adı bilgilerini çekme
+- Alan adı kayıt, güncelleme ve bitiş tarihlerini veritabanında saklama
+- Alan adının bitişine kalan gün sayısını hesaplama ve gösterme
+- Kullanıcı dostu arayüz ile alan adı kayıtlarını görüntüleme ve yönetme
 
-## Requirements
+## Gereksinimler
 
-- PHP 7.x or higher
-- cURL extension enabled
-- A MySQL database
-- WHOIS API key
+- PHP 7.x veya üzeri
+- cURL uzantısı etkin
+- MySQL veritabanı
+- WHOIS API anahtarı
 
-## Installation
+## Kurulum
 
-1. **Clone the repository:**
+1. **Depoyu klonlayın:**
 
     ```bash
-    git clone https://github.com/uydevops/domain-registration-system.git](https://github.com/uydevops/DomainSorgulama)
-    cd domain-DomainSorgulama
+    git clone https://github.com/uydevops/DomainSorgulama.git
+    cd DomainSorgulama
     ```
 
-2. **Configure the database:**
+2. **Veritabanını yapılandırın:**
 
-    Create a MySQL database and import the provided `schema.sql` file to set up the necessary tables.
+    MySQL veritabanınızı oluşturun ve gerekli tabloları oluşturmak için sağlanan `schema.sql` dosyasını içe aktarın.
 
-3. **Update the database connection:**
+3. **Veritabanı bağlantısını güncelleyin:**
 
-    Edit the `db.php` file to add your database connection details:
+    `Database.php` dosyasını açarak veritabanı bağlantı bilgilerinizi ekleyin:
 
     ```php
     <?php
-    try {
-        $db = new PDO('mysql:host=localhost;dbname=your_database_name;charset=utf8', 'your_username', 'your_password');
-    } catch (PDOException $e) {
-        echo 'Connection failed: ' . $e->getMessage();
+    class Database {
+        private $host = 'localhost';
+        private $db_name = 'your_database_name';
+        private $username = 'your_username';
+        private $password = 'your_password';
+        public $conn;
+
+        public function getConnection() {
+            $this->conn = null;
+            try {
+                $this->conn = new PDO("mysql:host=" . $this->host . ";dbname=" . $this->db_name, $this->username, $this->password);
+                $this->conn->exec("set names utf8");
+            } catch(PDOException $exception) {
+                echo "Connection error: " . $exception->getMessage();
+            }
+            return $this->conn;
+        }
     }
     ?>
     ```
 
-4. **Update the WHOIS API key:**
+4. **WHOIS API anahtarını güncelleyin:**
 
-    Replace the placeholder API key in your main script with your actual WHOIS API key:
+    `WhoisService.php` dosyasındaki API anahtarını kendi anahtarınızla değiştirin:
 
     ```php
-    $apikey = "your_actual_api_key";
+    <?php
+    class WhoisService {
+        private $apiKey;
+        
+        public function __construct($apiKey) {
+            $this->apiKey = $apiKey;
+        }
+        
+        public function fetchWhoisData($domain) {
+            $url = "https://api.whoapi.com/?domain=$domain&r=whois&apikey=" . $this->apiKey;
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            $output = json_decode(curl_exec($ch), true);
+            curl_close($ch);
+            return $output;
+        }
+    }
+    ?>
     ```
 
-## Usage
+## Kullanım
 
-1. **Run the application:**
+1. **Uygulamayı çalıştırın:**
 
-    Make sure your web server is running and navigate to the project directory.
+    Web sunucunuzun çalıştığından emin olun ve proje dizinine gidin.
 
-2. **Add a new domain:**
+2. **Yeni bir alan adı ekleyin:**
 
-    Click on the "Yeni Veri Ekle" button and fill in the domain name and company name. Submit the form to fetch and store the domain information.
+    "Yeni Veri Ekle" düğmesine tıklayın ve alan adı ve firma adını girin. Formu göndererek alan adı bilgilerini çekin ve saklayın.
 
-3. **View domain records:**
+3. **Alan adı kayıtlarını görüntüleyin:**
 
-    The main table displays all stored domain records with their respective registration, update, and expiry dates, along with the number of days remaining until expiry.
+    Ana tablo, saklanan tüm alan adı kayıtlarını ve bunların kayıt, güncelleme ve bitiş tarihlerini ve kalan gün sayısını gösterir.
 
-## Contributing
+## Katkıda Bulunma
 
-Contributions are welcome! Please fork the repository and submit a pull request with your changes. Ensure your code follows the existing coding style and includes appropriate tests.
+Katkılarınızı bekliyoruz! Lütfen projeyi fork edin ve değişikliklerinizi bir pull request ile gönderin. Kodunuzun mevcut kodlama tarzına uygun olmasına ve uygun testleri içermesine özen gösterin.
 
-## License
+## Lisans
 
-This project is open-source and available under the MIT License. See the [LICENSE](LICENSE) file for more information.
+Bu proje MIT Lisansı altında sunulmaktadır. Daha fazla bilgi için [LICENSE](LICENSE) dosyasına bakın.
 
-## Contact
+## İletişim
 
-For any questions or suggestions, feel free to reach out to me on [GitHub](https://github.com/uydevops).
+Herhangi bir soru veya öneriniz için bana [GitHub](https://github.com/uydevops) üzerinden ulaşabilirsiniz.
 
 ---
 
-Thank you for checking out this project! Your contributions and feedback are highly appreciated.
+Bu projeyi incelediğiniz için teşekkür ederim! Katkılarınız ve geri bildirimleriniz çok değerli.
